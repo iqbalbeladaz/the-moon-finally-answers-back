@@ -16,9 +16,17 @@ import { join } from "node:path";
 const ENTRY =
   "I heard every wish, every howl, every 3 a.m. promise — for four billion years. Tonight I finally answer: the quiet ones get yes, the howlers get the dark side, and the promises? I kept receipts.";
 
-// Gate: the scorer accepts 1–240 characters, a single line, non-blank.
-if ([...ENTRY].length < 1 || [...ENTRY].length > 240 || ENTRY.includes("\n") || ENTRY.trim().length === 0) {
-  throw new Error(`entry violates the 1–240 single-line gate (${[...ENTRY].length} chars)`);
+// Gate: the scorer accepts 1–240 characters, a single line, non-blank,
+// with no control characters other than the line's own punctuation.
+const chars = [...ENTRY];
+if (
+  chars.length < 1 ||
+  chars.length > 240 ||
+  ENTRY.includes("\n") ||
+  ENTRY.trim().length === 0 ||
+  chars.some((c) => c.codePointAt(0) < 0x20)
+) {
+  throw new Error(`entry violates the 1–240 single-line gate (${chars.length} chars)`);
 }
 
 const outDir = process.env.OUTPUT_DIR ?? "/output";
